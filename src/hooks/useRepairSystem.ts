@@ -1,76 +1,119 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { RepairTicket, Customer, RepairStatus } from '../types';
-import { mockRepairTickets, mockCustomers, mockTechnicians } from '../data/mockData';
+import { customerService } from '../services/customerService';
+import { technicianService } from '../services/technicianService';
+import { repairTicketService } from '../services/repairTicketService';
 
 export const useRepairSystem = () => {
-  const [tickets, setTickets] = useState<RepairTicket[]>(mockRepairTickets);
-  const [customers, setCustomers] = useState<Customer[]>(mockCustomers);
-  const [technicians] = useState(mockTechnicians);
+  const [tickets, setTickets] = useState<RepairTicket[]>([]);
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [technicians, setTechnicians] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const createTicket = (ticketData: Partial<RepairTicket>) => {
-    const newTicket: RepairTicket = {
-      id: `RPR-${String(tickets.length + 1).padStart(3, '0')}`,
-      customerId: ticketData.customerId || '',
-      customerName: ticketData.customerName || '',
-      deviceType: ticketData.deviceType || '',
-      deviceModel: ticketData.deviceModel || '',
-      serialNumber: ticketData.serialNumber,
-      issueDescription: ticketData.issueDescription || '',
-      estimatedCost: ticketData.estimatedCost || 0,
-      actualCost: ticketData.actualCost,
-      status: ticketData.status || RepairStatus.RECEIVED,
-      priority: ticketData.priority || 'medium',
-      grade: ticketData.grade,
-      gradeNotes: ticketData.gradeNotes,
-      technicianId: ticketData.technicianId,
-      technicianName: ticketData.technicianName,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      completedAt: ticketData.completedAt
-    };
+  // Load data on mount
+  useEffect(() => {
+    loadAllData();
+  }, []);
 
-    setTickets(prev => [...prev, newTicket]);
+  const loadAllData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const [ticketsData, customersData, techniciansData] = await Promise.all([
+        repairTicketService.getAll(),
+        customerService.getAll(),
+        technicianService.getAll()
+      ]);
+
+      setTickets(ticketsData);
+      setCustomers(customersData);
+      setTechnicians(techniciansData);
+    } catch (err) {
+      console.error('Error loading data:', err);
+      setError('Failed to load data. Please check your Supabase connection.');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const updateTicket = (ticketId: string, updates: Partial<RepairTicket>) => {
-    setTickets(prev => prev.map(ticket => 
-      ticket.id === ticketId 
-        ? { 
-            ...ticket, 
-            ...updates, 
-            updatedAt: new Date().toISOString(),
-            completedAt: updates.status === RepairStatus.COMPLETED ? new Date().toISOString() : ticket.completedAt
-          }
-        : ticket
-    ));
+  const createTicket = async (ticketData: Partial<RepairTicket>) => {
+    try {
+      const newTicket = await repairTicketService.create({
+        customerId: ticketData.customerId || '',
+        deviceType: ticketData.deviceType || '',
+        deviceModel: ticketData.deviceModel || '',
+        serialNumber: ticketData.serialNumber,
+        issueDescription: ticketData.issueDescription || '',
+        estimatedCost: ticketData.estimatedCost || 0,
+        actualCost: ticketData.actualCost,
+        status: ticketData.status || RepairStatus.RECEIVED,
+        priority: ticketData.priority || 'medium',
+        grade: ticketData.grade,
+        gradeNotes: ticketData.gradeNotes,
+        technicianId: ticketData.technicianId,
+        images: ticketData.images,
+        completedAt: ticketData.completedAt
+      });
+      
+      setTickets(prev => [newTicket, ...prev]);
+    } catch (err) {
+      console.error('Error creating ticket:', err);
+      throw err;
+    }
   };
 
-  const createCustomer = (customerData: Partial<Customer>) => {
-    const newCustomer: Customer = {
-      id: String(customers.length + 1),
-      name: customerData.name || '',
-      email: customerData.email || '',
-      phone: customerData.phone || '',
-      address: customerData.address || '',
-      createdAt: new Date().toISOString()
-    };
-
-    setCustomers(prev => [...prev, newCustomer]);
+  const updateTicket = async (ticketId: string, updates: Partial<RepairTicket>) => {
+    try {
+      const updatedTicket = await repairTicketService.update(ticketId, updates);
+      setTickets(prev => prev.map(ticket => 
+        ticket.id === ticketId ? updatedTicket : ticket
+      ));
+    } catch (err) {
+      console.error('Error updating ticket:', err);
+      throw err;
+    }
   };
 
-  const updateCustomer = (customerId: string, updates: Partial<Customer>) => {
-    setCustomers(prev => prev.map(customer =>
-      customer.id === customerId ? { ...customer, ...updates } : customer
-    ));
+  const createCustomer = async (customerData: Partial<Customer>) => {
+    try {
+      const newCustomer = await customerService.create({
+        name: customerData.name || '',
+        email: customerData.email || '',
+        phone: customerData.phone || '',
+        address: customerData.address || ''
+      });
+      
+      setCustomers(prev => [newCustomer, ...prev]);
+    } catch (err) {
+      console.error('Error creating customer:', err);
+      throw err;
+    }
+  };
+
+  const updateCustomer = async (customerId: string, updates: Partial<Customer>) => {
+    try {
+      const updatedCustomer = await customerService.update(customerId, updates);
+      setCustomers(prev => prev.map(customer =>
+        customer.id === customerId ? updatedCustomer : customer
+      ));
+    } catch (err) {
+      console.error('Error updating customer:', err);
+      throw err;
+    }
   };
 
   return {
     tickets,
     customers,
     technicians,
+    loading,
+    error,
     createTicket,
     updateTicket,
     createCustomer,
-    updateCustomer
+    updateCustomer,
+    refreshData: loadAllData
   };
 };

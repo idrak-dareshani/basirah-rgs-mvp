@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { AlertCircle, Loader2 } from 'lucide-react';
 import Layout from './components/Layout';
 import Dashboard from './components/Dashboard';
 import RepairTickets from './components/RepairTickets';
@@ -20,6 +21,8 @@ function App() {
     tickets,
     customers,
     technicians,
+    loading,
+    error,
     createTicket,
     updateTicket,
     createCustomer,
@@ -46,10 +49,34 @@ function App() {
   };
 
   const handleSaveTicket = (ticketData: Partial<RepairTicket>) => {
-    if (modalMode === 'create') {
-      createTicket(ticketData);
-    } else if (modalMode === 'edit' && selectedTicket) {
-      updateTicket(selectedTicket.id, ticketData);
+    const saveTicket = async () => {
+      try {
+        if (modalMode === 'create') {
+          await createTicket(ticketData);
+        } else if (modalMode === 'edit' && selectedTicket) {
+          await updateTicket(selectedTicket.id, ticketData);
+        }
+        setIsTicketModalOpen(false);
+      } catch (error) {
+        console.error('Error saving ticket:', error);
+        // You could add a toast notification here
+      }
+    };
+    
+    saveTicket();
+  };
+
+  const handleSaveCustomer = async (customerData: Partial<Customer>) => {
+    try {
+      if (modalMode === 'create') {
+        await createCustomer(customerData);
+      } else if (modalMode === 'edit' && selectedCustomer) {
+        await updateCustomer(selectedCustomer.id, customerData);
+      }
+      setIsCustomerModalOpen(false);
+    } catch (error) {
+      console.error('Error saving customer:', error);
+      // You could add a toast notification here
     }
   };
 
@@ -66,13 +93,34 @@ function App() {
     setIsCustomerModalOpen(true);
   };
 
-  const handleSaveCustomer = (customerData: Partial<Customer>) => {
-    if (modalMode === 'create') {
-      createCustomer(customerData);
-    } else if (modalMode === 'edit' && selectedCustomer) {
-      updateCustomer(selectedCustomer.id, customerData);
-    }
-  };
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin text-blue-600 mx-auto mb-4" />
+          <h2 className="text-lg font-semibold text-gray-900 mb-2">Loading RepairPro</h2>
+          <p className="text-gray-600">Connecting to database...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto p-6">
+          <AlertCircle className="w-12 h-12 text-red-600 mx-auto mb-4" />
+          <h2 className="text-lg font-semibold text-gray-900 mb-2">Connection Error</h2>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <p className="text-sm text-gray-500">
+            Please make sure you've connected to Supabase by clicking the "Connect to Supabase" button in the top right corner.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   const renderCurrentView = () => {
     switch (currentView) {

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Search, Mail, Phone, MapPin, Edit, Eye } from 'lucide-react';
+import { Plus, Search, Mail, Phone, MapPin, Edit, Eye, Users } from 'lucide-react';
 import { Customer } from '../types';
 import { formatDate } from '../utils/formatters';
 

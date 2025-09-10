@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Plus, Filter, Eye, Edit, Trash2 } from 'lucide-react';
+import { Search, Plus, Filter, Eye, Edit, Ticket } from 'lucide-react';
 import { RepairTicket, RepairStatus, Priority } from '../types';
 import { formatCurrency, formatDate, getStatusColor, getPriorityColor, getGradeColor } from '../utils/formatters';
 
