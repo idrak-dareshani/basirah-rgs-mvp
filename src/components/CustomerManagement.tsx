@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Search, Mail, Phone, MapPin, Edit, Eye, Users } from 'lucide-react';
+import { Plus, Search, Mail, Phone, MapPin, Edit, Eye, Users, Trash2 } from 'lucide-react';
 import { Customer } from '../types';
 import { formatDate } from '../utils/formatters';
 
@@ -7,12 +7,14 @@ interface CustomerManagementProps {
   customers: Customer[];
   onCreateCustomer: () => void;
   onEditCustomer: (customer: Customer) => void;
+  onDeleteCustomer: (customerId: string) => void;
 }
 
 const CustomerManagement: React.FC<CustomerManagementProps> = ({
   customers,
   onCreateCustomer,
-  onEditCustomer
+  onEditCustomer,
+  onDeleteCustomer
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -21,6 +23,16 @@ const CustomerManagement: React.FC<CustomerManagementProps> = ({
     customer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
     customer.phone.includes(searchTerm)
   );
+
+  const handleDeleteCustomer = async (customerId: string, customerName: string) => {
+    if (window.confirm(`Are you sure you want to delete customer ${customerName}? This action cannot be undone.`)) {
+      try {
+        await onDeleteCustomer(customerId);
+      } catch (error) {
+        alert('Failed to delete customer. Please try again.');
+      }
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -66,12 +78,20 @@ const CustomerManagement: React.FC<CustomerManagementProps> = ({
                   <h3 className="text-lg font-semibold text-gray-900">{customer.name}</h3>
                   <p className="text-sm text-gray-500">Customer since {formatDate(customer.createdAt)}</p>
                 </div>
-                <button
-                  onClick={() => onEditCustomer(customer)}
-                  className="text-gray-400 hover:text-blue-600 transition-colors duration-200"
-                >
-                  <Edit className="w-4 h-4" />
-                </button>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => onEditCustomer(customer)}
+                    className="text-gray-400 hover:text-blue-600 transition-colors duration-200"
+                  >
+                    <Edit className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => handleDeleteCustomer(customer.id, customer.name)}
+                    className="text-gray-400 hover:text-red-600 transition-colors duration-200"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
 
               <div className="space-y-3">
@@ -90,13 +110,22 @@ const CustomerManagement: React.FC<CustomerManagementProps> = ({
               </div>
 
               <div className="mt-6 pt-4 border-t border-gray-100">
-                <button
-                  onClick={() => onEditCustomer(customer)}
-                  className="w-full bg-blue-50 text-blue-700 px-4 py-2 rounded-lg hover:bg-blue-100 transition-colors duration-200 flex items-center justify-center space-x-2"
-                >
-                  <Eye className="w-4 h-4" />
-                  <span>View Details</span>
-                </button>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => onEditCustomer(customer)}
+                    className="bg-blue-50 text-blue-700 px-4 py-2 rounded-lg hover:bg-blue-100 transition-colors duration-200 flex items-center justify-center space-x-2"
+                  >
+                    <Eye className="w-4 h-4" />
+                    <span>View</span>
+                  </button>
+                  <button
+                    onClick={() => handleDeleteCustomer(customer.id, customer.name)}
+                    className="bg-red-50 text-red-700 px-4 py-2 rounded-lg hover:bg-red-100 transition-colors duration-200 flex items-center justify-center space-x-2"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    <span>Delete</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>

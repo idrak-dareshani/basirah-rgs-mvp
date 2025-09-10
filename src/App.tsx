@@ -27,7 +27,8 @@ function App() {
     updateTicket,
     deleteTicket,
     createCustomer,
-    updateCustomer
+    updateCustomer,
+    deleteCustomer
   } = useRepairSystem();
 
   // Ticket Modal Handlers
@@ -98,6 +99,10 @@ function App() {
     setIsCustomerModalOpen(true);
   };
 
+  const handleDeleteCustomer = async (customerId: string) => {
+    await deleteCustomer(customerId);
+  };
+
   // Show loading state
   if (loading) {
     return (
@@ -147,6 +152,7 @@ function App() {
             customers={customers}
             onCreateCustomer={handleCreateCustomer}
             onEditCustomer={handleEditCustomer}
+            onDeleteCustomer={handleDeleteCustomer}
           />
         );
       case 'settings':

@@ -114,6 +114,16 @@ export const useRepairSystem = () => {
     }
   };
 
+  const deleteCustomer = async (customerId: string) => {
+    try {
+      await customerService.delete(customerId);
+      setCustomers(prev => prev.filter(customer => customer.id !== customerId));
+    } catch (err) {
+      console.error('Error deleting customer:', err);
+      throw err;
+    }
+  };
+
   return {
     tickets,
     customers,
@@ -125,6 +135,7 @@ export const useRepairSystem = () => {
     deleteTicket,
     createCustomer,
     updateCustomer,
+    deleteCustomer,
     refreshData: loadAllData
   };
 };
