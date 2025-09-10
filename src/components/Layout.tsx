@@ -1,5 +1,5 @@
 import React from 'react';
-import { Wrench, Home, Ticket, Users, Settings } from 'lucide-react';
+import { Wrench, Home, Ticket, Users, Settings, BarChart3 } from 'lucide-react';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -13,6 +13,7 @@ const Layout: React.FC<LayoutProps> = ({ children, currentView, onViewChange }) 
     { id: 'tickets', label: 'Repair Tickets', icon: Ticket },
     { id: 'customers', label: 'Customers', icon: Users },
     { id: 'workload', label: 'Technician Workload', icon: Users },
+    { id: 'reports', label: 'Reports', icon: BarChart3 },
     { id: 'settings', label: 'Settings', icon: Settings },
   ];
 

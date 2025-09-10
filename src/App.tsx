@@ -5,6 +5,7 @@ import Dashboard from './components/Dashboard';
 import RepairTickets from './components/RepairTickets';
 import CustomerManagement from './components/CustomerManagement';
 import TechnicianWorkload from './components/TechnicianWorkload';
+import Reports from './components/Reports';
 import TicketModal from './components/TicketModal';
 import CustomerModal from './components/CustomerModal';
 import { useRepairSystem } from './hooks/useRepairSystem';
@@ -178,6 +179,14 @@ function App() {
             technicians={technicians}
             tickets={tickets}
             onAssignTicket={handleAssignTicket}
+          />
+        );
+      case 'reports':
+        return (
+          <Reports
+            tickets={tickets}
+            customers={customers}
+            technicians={technicians}
           />
         );
       case 'settings':
