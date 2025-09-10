@@ -5,9 +5,11 @@ import { formatCurrency } from '../utils/formatters';
 
 interface DashboardProps {
   tickets: RepairTicket[];
+  onCreateTicket: () => void;
+  onCreateCustomer: () => void;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ tickets }) => {
+const Dashboard: React.FC<DashboardProps> = ({ tickets, onCreateTicket, onCreateCustomer }) => {
   const activeTickets = tickets.filter(t => 
     ![RepairStatus.COMPLETED, RepairStatus.PICKED_UP, RepairStatus.CANCELLED].includes(t.status)
   );
@@ -124,10 +126,16 @@ const Dashboard: React.FC<DashboardProps> = ({ tickets }) => {
             <h3 className="text-lg font-semibold text-gray-900">Quick Actions</h3>
           </div>
           <div className="p-6 space-y-4">
-            <button className="w-full bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium">
+            <button 
+              onClick={onCreateTicket}
+              className="w-full bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium"
+            >
               Create New Ticket
             </button>
-            <button className="w-full bg-emerald-600 text-white px-4 py-3 rounded-lg hover:bg-emerald-700 transition-colors duration-200 font-medium">
+            <button 
+              onClick={onCreateCustomer}
+              className="w-full bg-emerald-600 text-white px-4 py-3 rounded-lg hover:bg-emerald-700 transition-colors duration-200 font-medium"
+            >
               Add Customer
             </button>
             <button className="w-full bg-gray-600 text-white px-4 py-3 rounded-lg hover:bg-gray-700 transition-colors duration-200 font-medium">

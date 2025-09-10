@@ -125,7 +125,7 @@ function App() {
   const renderCurrentView = () => {
     switch (currentView) {
       case 'dashboard':
-        return <Dashboard tickets={tickets} />;
+        return <Dashboard tickets={tickets} onCreateTicket={handleCreateTicket} onCreateCustomer={handleCreateCustomer} />;
       case 'tickets':
         return (
           <RepairTickets
