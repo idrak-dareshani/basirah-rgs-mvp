@@ -90,15 +90,3 @@ export const customerService = {
     }
   }
 };
-
-async delete(id: string): Promise<void> {
-  const { error } = await supabase
-    .from('rgs_customers')
-    .delete()
-    .eq('id', id);
-
-  if (error) {
-    console.error('Error deleting customer:', error);
-    throw error;
-  }
-}
