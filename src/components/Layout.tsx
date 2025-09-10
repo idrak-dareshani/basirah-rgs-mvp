@@ -23,15 +23,15 @@ const Layout: React.FC<LayoutProps> = ({ children, currentView, onViewChange }) 
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="px-4 sm:px-6 lg:px-8">
           <div className="flex items-center h-16">
             <button
               onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-              className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors duration-200 mr-4"
+              className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors duration-200 mr-3"
             >
               <Menu className="w-5 h-5 text-gray-600" />
             </button>
-            <div className="flex items-center space-x-3 flex-1">
+            <div className="flex items-center space-x-3">
               <div className="flex items-center justify-center w-10 h-10 bg-blue-600 rounded-lg">
                 <Wrench className="w-6 h-6 text-white" />
               </div>
@@ -40,7 +40,7 @@ const Layout: React.FC<LayoutProps> = ({ children, currentView, onViewChange }) 
                 <p className="text-sm text-gray-500">Repair & Grading System</p>
               </div>
             </div>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-4 ml-auto">
               <div className="text-right">
                 <p className="text-sm font-medium text-gray-900">Admin User</p>
                 <p className="text-xs text-gray-500">admin@basirah.com</p>
