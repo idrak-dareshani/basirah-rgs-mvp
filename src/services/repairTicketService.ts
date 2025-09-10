@@ -1,6 +1,33 @@
 import { supabase } from '../lib/supabase';
 import { RepairTicket, RepairStatus } from '../types';
 
+// Helper function to upload images to Supabase Storage
+const uploadImages = async (files: File[], ticketId: string): Promise<string[]> => {
+  const uploadPromises = files.map(async (file, index) => {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${ticketId}-${Date.now()}-${index}.${fileExt}`;
+    const filePath = `${ticketId}/${fileName}`;
+
+    const { data, error } = await supabase.storage
+      .from('repair-ticket-images')
+      .upload(filePath, file);
+
+    if (error) {
+      console.error('Error uploading image:', error);
+      throw error;
+    }
+
+    // Get the public URL for the uploaded image
+    const { data: { publicUrl } } = supabase.storage
+      .from('repair-ticket-images')
+      .getPublicUrl(filePath);
+
+    return publicUrl;
+  });
+
+  return Promise.all(uploadPromises);
+};
+
 export const repairTicketService = {
   async getAll(): Promise<RepairTicket[]> {
     const { data, error } = await supabase
@@ -40,7 +67,7 @@ export const repairTicketService = {
     }));
   },
 
-  async create(ticketData: Omit<RepairTicket, 'id' | 'customerName' | 'technicianName' | 'createdAt' | 'updatedAt'>): Promise<RepairTicket> {
+  async create(ticketData: Omit<RepairTicket, 'id' | 'customerName' | 'technicianName' | 'createdAt' | 'updatedAt'>, filesToUpload?: File[]): Promise<RepairTicket> {
     // Generate next ticket ID
     const { data: lastTicket } = await supabase
       .from('rgs_repair_tickets')
@@ -56,6 +83,13 @@ export const repairTicketService = {
     }
 
     const newId = `RPR-${String(nextNumber).padStart(3, '0')}`;
+
+    // Upload images if provided
+    let imageUrls: string[] = ticketData.images || [];
+    if (filesToUpload && filesToUpload.length > 0) {
+      const uploadedUrls = await uploadImages(filesToUpload, newId);
+      imageUrls = [...imageUrls, ...uploadedUrls];
+    }
 
     const { data, error } = await supabase
       .from('rgs_repair_tickets')
@@ -73,7 +107,7 @@ export const repairTicketService = {
         grade: ticketData.grade,
         grade_notes: ticketData.gradeNotes,
         technician_id: ticketData.technicianId,
-        images: ticketData.images || [],
+        images: imageUrls,
         completed_at: ticketData.completedAt
       })
       .select(`
@@ -111,7 +145,7 @@ export const repairTicketService = {
     };
   },
 
-  async update(id: string, updates: Partial<RepairTicket>): Promise<RepairTicket> {
+  async update(id: string, updates: Partial<RepairTicket>, filesToUpload?: File[]): Promise<RepairTicket> {
     const updateData: any = {};
     
     if (updates.customerId !== undefined) updateData.customer_id = updates.customerId;
@@ -132,7 +166,19 @@ export const repairTicketService = {
     if (updates.grade !== undefined) updateData.grade = updates.grade;
     if (updates.gradeNotes !== undefined) updateData.grade_notes = updates.gradeNotes;
     if (updates.technicianId !== undefined) updateData.technician_id = updates.technicianId;
-    if (updates.images !== undefined) updateData.images = updates.images;
+    
+    // Handle image updates
+    if (updates.images !== undefined || (filesToUpload && filesToUpload.length > 0)) {
+      let imageUrls: string[] = updates.images || [];
+      
+      // Upload new images if provided
+      if (filesToUpload && filesToUpload.length > 0) {
+        const uploadedUrls = await uploadImages(filesToUpload, id);
+        imageUrls = [...imageUrls, ...uploadedUrls];
+      }
+      
+      updateData.images = imageUrls;
+    }
 
     const { data, error } = await supabase
       .from('rgs_repair_tickets')

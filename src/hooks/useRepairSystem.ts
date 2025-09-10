@@ -40,22 +40,23 @@ export const useRepairSystem = () => {
 
   const createTicket = async (ticketData: Partial<RepairTicket>) => {
     try {
+      const { filesToUpload, ...ticketDataWithoutFiles } = ticketData as any;
       const newTicket = await repairTicketService.create({
-        customerId: ticketData.customerId || '',
-        deviceType: ticketData.deviceType || '',
-        deviceModel: ticketData.deviceModel || '',
-        serialNumber: ticketData.serialNumber,
-        issueDescription: ticketData.issueDescription || '',
-        estimatedCost: ticketData.estimatedCost || 0,
-        actualCost: ticketData.actualCost,
-        status: ticketData.status || RepairStatus.RECEIVED,
-        priority: ticketData.priority || 'medium',
-        grade: ticketData.grade,
-        gradeNotes: ticketData.gradeNotes,
-        technicianId: ticketData.technicianId,
-        images: ticketData.images,
-        completedAt: ticketData.completedAt
-      });
+        customerId: ticketDataWithoutFiles.customerId || '',
+        deviceType: ticketDataWithoutFiles.deviceType || '',
+        deviceModel: ticketDataWithoutFiles.deviceModel || '',
+        serialNumber: ticketDataWithoutFiles.serialNumber,
+        issueDescription: ticketDataWithoutFiles.issueDescription || '',
+        estimatedCost: ticketDataWithoutFiles.estimatedCost || 0,
+        actualCost: ticketDataWithoutFiles.actualCost,
+        status: ticketDataWithoutFiles.status || RepairStatus.RECEIVED,
+        priority: ticketDataWithoutFiles.priority || 'medium',
+        grade: ticketDataWithoutFiles.grade,
+        gradeNotes: ticketDataWithoutFiles.gradeNotes,
+        technicianId: ticketDataWithoutFiles.technicianId,
+        images: ticketDataWithoutFiles.images,
+        completedAt: ticketDataWithoutFiles.completedAt
+      }, filesToUpload);
       
       setTickets(prev => [newTicket, ...prev]);
     } catch (err) {
@@ -66,7 +67,8 @@ export const useRepairSystem = () => {
 
   const updateTicket = async (ticketId: string, updates: Partial<RepairTicket>) => {
     try {
-      const updatedTicket = await repairTicketService.update(ticketId, updates);
+      const { filesToUpload, ...updatesWithoutFiles } = updates as any;
+      const updatedTicket = await repairTicketService.update(ticketId, updatesWithoutFiles, filesToUpload);
       setTickets(prev => prev.map(ticket => 
         ticket.id === ticketId ? updatedTicket : ticket
       ));

@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { X, Save, User, Smartphone, FileText, DollarSign, Star } from 'lucide-react';
+import { X, Save, User, Smartphone, FileText, DollarSign, Star, Upload, Image as ImageIcon, Trash2 } from 'lucide-react';
 import { RepairTicket, RepairStatus, Priority, Grade, Customer, Technician } from '../types';
 
 interface TicketModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (ticket: Partial<RepairTicket>) => void;
+  onSave: (ticket: Partial<RepairTicket> & { filesToUpload?: File[] }) => void;
   ticket?: RepairTicket;
   customers: Customer[];
   technicians: Technician[];
@@ -21,6 +21,8 @@ const TicketModal: React.FC<TicketModalProps> = ({
   technicians,
   mode
 }) => {
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [formData, setFormData] = useState<Partial<RepairTicket>>({
     customerId: '',
     customerName: '',
@@ -35,7 +37,8 @@ const TicketModal: React.FC<TicketModalProps> = ({
     grade: undefined,
     gradeNotes: '',
     technicianId: '',
-    technicianName: ''
+    technicianName: '',
+    images: []
   });
 
   useEffect(() => {
@@ -56,11 +59,45 @@ const TicketModal: React.FC<TicketModalProps> = ({
         grade: undefined,
         gradeNotes: '',
         technicianId: '',
-        technicianName: ''
+        technicianName: '',
+        images: []
       });
     }
+    // Reset file selections when ticket changes
+    setSelectedFiles([]);
+    setImagePreviews([]);
   }, [ticket]);
 
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    if (files.length === 0) return;
+
+    // Create preview URLs for selected files
+    const newPreviews = files.map(file => URL.createObjectURL(file));
+    
+    setSelectedFiles(prev => [...prev, ...files]);
+    setImagePreviews(prev => [...prev, ...newPreviews]);
+  };
+
+  const removeSelectedImage = (index: number) => {
+    // Revoke the object URL to prevent memory leaks
+    URL.revokeObjectURL(imagePreviews[index]);
+    
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+    setImagePreviews(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const removeExistingImage = (index: number) => {
+    const updatedImages = (formData.images || []).filter((_, i) => i !== index);
+    setFormData(prev => ({ ...prev, images: updatedImages }));
+  };
+
+  // Cleanup object URLs when component unmounts
+  useEffect(() => {
+    return () => {
+      imagePreviews.forEach(url => URL.revokeObjectURL(url));
+    };
+  }, []);
   const handleCustomerChange = (customerId: string) => {
     const customer = customers.find(c => c.id === customerId);
     setFormData(prev => ({
@@ -81,7 +118,7 @@ const TicketModal: React.FC<TicketModalProps> = ({
 
   const handleSave = () => {
     if (mode !== 'view') {
-      onSave(formData);
+      onSave({ ...formData, filesToUpload: selectedFiles });
     }
     onClose();
   };
