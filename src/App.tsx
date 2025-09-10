@@ -25,6 +25,7 @@ function App() {
     error,
     createTicket,
     updateTicket,
+    deleteTicket,
     createCustomer,
     updateCustomer
   } = useRepairSystem();
@@ -64,6 +65,10 @@ function App() {
     };
     
     saveTicket();
+  };
+
+  const handleDeleteTicket = async (ticketId: string) => {
+    await deleteTicket(ticketId);
   };
 
   const handleSaveCustomer = async (customerData: Partial<Customer>) => {
@@ -133,6 +138,7 @@ function App() {
             onCreateTicket={handleCreateTicket}
             onEditTicket={handleEditTicket}
             onViewTicket={handleViewTicket}
+            onDeleteTicket={handleDeleteTicket}
           />
         );
       case 'customers':

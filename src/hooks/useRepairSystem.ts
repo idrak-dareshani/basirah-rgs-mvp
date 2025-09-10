@@ -76,6 +76,16 @@ export const useRepairSystem = () => {
     }
   };
 
+  const deleteTicket = async (ticketId: string) => {
+    try {
+      await repairTicketService.delete(ticketId);
+      setTickets(prev => prev.filter(ticket => ticket.id !== ticketId));
+    } catch (err) {
+      console.error('Error deleting ticket:', err);
+      throw err;
+    }
+  };
+
   const createCustomer = async (customerData: Partial<Customer>) => {
     try {
       const newCustomer = await customerService.create({
@@ -112,6 +122,7 @@ export const useRepairSystem = () => {
     error,
     createTicket,
     updateTicket,
+    deleteTicket,
     createCustomer,
     updateCustomer,
     refreshData: loadAllData

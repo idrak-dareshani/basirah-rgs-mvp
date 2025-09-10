@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Plus, Filter, Eye, Edit, Ticket } from 'lucide-react';
+import { Search, Plus, Filter, Eye, Edit, Ticket, Trash2 } from 'lucide-react';
 import { RepairTicket, RepairStatus, Priority } from '../types';
 import { formatCurrency, formatDate, getStatusColor, getPriorityColor, getGradeColor } from '../utils/formatters';
 
@@ -8,13 +8,15 @@ interface RepairTicketsProps {
   onCreateTicket: () => void;
   onEditTicket: (ticket: RepairTicket) => void;
   onViewTicket: (ticket: RepairTicket) => void;
+  onDeleteTicket: (ticketId: string) => void;
 }
 
 const RepairTickets: React.FC<RepairTicketsProps> = ({ 
   tickets, 
   onCreateTicket, 
   onEditTicket, 
-  onViewTicket 
+  onViewTicket,
+  onDeleteTicket
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -35,6 +37,16 @@ const RepairTickets: React.FC<RepairTicketsProps> = ({
 
   const statusOptions = Object.values(RepairStatus);
   const priorityOptions = Object.values(Priority);
+
+  const handleDeleteTicket = async (ticketId: string, ticketName: string) => {
+    if (window.confirm(`Are you sure you want to delete ticket ${ticketId} for ${ticketName}? This action cannot be undone.`)) {
+      try {
+        await onDeleteTicket(ticketId);
+      } catch (error) {
+        alert('Failed to delete ticket. Please try again.');
+      }
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -165,20 +177,27 @@ const RepairTickets: React.FC<RepairTicketsProps> = ({
               )}
 
               {/* Actions */}
-              <div className="flex space-x-2">
+              <div className="grid grid-cols-3 gap-2">
                 <button
                   onClick={() => onViewTicket(ticket)}
-                  className="flex-1 bg-gray-100 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-200 transition-colors duration-200 flex items-center justify-center space-x-1"
+                  className="bg-gray-100 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-200 transition-colors duration-200 flex items-center justify-center space-x-1"
                 >
                   <Eye className="w-4 h-4" />
                   <span>View</span>
                 </button>
                 <button
                   onClick={() => onEditTicket(ticket)}
-                  className="flex-1 bg-blue-100 text-blue-700 px-3 py-2 rounded-lg hover:bg-blue-200 transition-colors duration-200 flex items-center justify-center space-x-1"
+                  className="bg-blue-100 text-blue-700 px-3 py-2 rounded-lg hover:bg-blue-200 transition-colors duration-200 flex items-center justify-center space-x-1"
                 >
                   <Edit className="w-4 h-4" />
                   <span>Edit</span>
+                </button>
+                <button
+                  onClick={() => handleDeleteTicket(ticket.id, ticket.customerName)}
+                  className="bg-red-100 text-red-700 px-3 py-2 rounded-lg hover:bg-red-200 transition-colors duration-200 flex items-center justify-center space-x-1"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  <span>Delete</span>
                 </button>
               </div>
             </div>
