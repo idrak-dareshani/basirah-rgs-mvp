@@ -12,6 +12,7 @@ const Layout: React.FC<LayoutProps> = ({ children, currentView, onViewChange }) 
     { id: 'dashboard', label: 'Dashboard', icon: Home },
     { id: 'tickets', label: 'Repair Tickets', icon: Ticket },
     { id: 'customers', label: 'Customers', icon: Users },
+    { id: 'workload', label: 'Technician Workload', icon: Users },
     { id: 'settings', label: 'Settings', icon: Settings },
   ];
 

@@ -4,6 +4,7 @@ import Layout from './components/Layout';
 import Dashboard from './components/Dashboard';
 import RepairTickets from './components/RepairTickets';
 import CustomerManagement from './components/CustomerManagement';
+import TechnicianWorkload from './components/TechnicianWorkload';
 import TicketModal from './components/TicketModal';
 import CustomerModal from './components/CustomerModal';
 import { useRepairSystem } from './hooks/useRepairSystem';
@@ -103,6 +104,22 @@ function App() {
     await deleteCustomer(customerId);
   };
 
+  const handleAssignTicket = async (ticketId: string, technicianId: string) => {
+    try {
+      const ticket = tickets.find(t => t.id === ticketId);
+      const technician = technicians.find(t => t.id === technicianId);
+      
+      if (ticket && technician) {
+        await updateTicket(ticketId, {
+          technicianId: technicianId,
+          technicianName: technician.name
+        });
+      }
+    } catch (error) {
+      console.error('Error assigning ticket:', error);
+    }
+  };
+
   // Show loading state
   if (loading) {
     return (
@@ -153,6 +170,14 @@ function App() {
             onCreateCustomer={handleCreateCustomer}
             onEditCustomer={handleEditCustomer}
             onDeleteCustomer={handleDeleteCustomer}
+          />
+        );
+      case 'workload':
+        return (
+          <TechnicianWorkload
+            technicians={technicians}
+            tickets={tickets}
+            onAssignTicket={handleAssignTicket}
           />
         );
       case 'settings':
