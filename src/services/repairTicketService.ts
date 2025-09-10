@@ -185,15 +185,4 @@ export const repairTicketService = {
     }
   }
 
-  async delete(id: string): Promise<void> {
-    const { error } = await supabase
-      .from('rgs_repair_tickets')
-      .delete()
-      .eq('id', id);
-
-    if (error) {
-      console.error('Error deleting repair ticket:', error);
-      throw error;
-    }
-  }
 };
