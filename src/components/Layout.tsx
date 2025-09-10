@@ -1,5 +1,5 @@
 import React from 'react';
-import { Wrench, Home, Ticket, Users, Settings, BarChart3 } from 'lucide-react';
+import { Wrench, Home, Ticket, Users, Settings, BarChart3, Menu } from 'lucide-react';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -8,6 +8,8 @@ interface LayoutProps {
 }
 
 const Layout: React.FC<LayoutProps> = ({ children, currentView, onViewChange }) => {
+  const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false);
+
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Home },
     { id: 'tickets', label: 'Repair Tickets', icon: Ticket },
@@ -24,18 +26,24 @@ const Layout: React.FC<LayoutProps> = ({ children, currentView, onViewChange }) 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-3">
+              <button
+                onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors duration-200"
+              >
+                <Menu className="w-5 h-5 text-gray-600" />
+              </button>
               <div className="flex items-center justify-center w-10 h-10 bg-blue-600 rounded-lg">
                 <Wrench className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-gray-900">RepairPro</h1>
-                <p className="text-sm text-gray-500">Repair & Grading System</p>
+                <h1 className="text-xl font-bold text-gray-900">Basirah-RGS</h1>
+                <p className="text-sm text-gray-500">RGS System</p>
               </div>
             </div>
             <div className="flex items-center space-x-4">
               <div className="text-right">
                 <p className="text-sm font-medium text-gray-900">Admin User</p>
-                <p className="text-xs text-gray-500">admin@repairpro.com</p>
+                <p className="text-xs text-gray-500">admin@basirah.com</p>
               </div>
             </div>
           </div>
@@ -44,20 +52,21 @@ const Layout: React.FC<LayoutProps> = ({ children, currentView, onViewChange }) 
 
       <div className="flex">
         {/* Sidebar */}
-        <nav className="w-64 bg-white shadow-sm border-r border-gray-200 min-h-screen">
+        <nav className={`${sidebarCollapsed ? 'w-16' : 'w-64'} bg-white shadow-sm border-r border-gray-200 min-h-screen transition-all duration-300`}>
           <div className="p-4 space-y-2">
             {navItems.map(({ id, label, icon: Icon }) => (
               <button
                 key={id}
                 onClick={() => onViewChange(id)}
-                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-all duration-200 ${
+                className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center px-2' : 'space-x-3 px-4'} py-3 rounded-lg text-left transition-all duration-200 ${
                   currentView === id
                     ? 'bg-blue-50 text-blue-700 border border-blue-200'
                     : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
                 }`}
+                title={sidebarCollapsed ? label : undefined}
               >
                 <Icon className="w-5 h-5" />
-                <span className="font-medium">{label}</span>
+                {!sidebarCollapsed && <span className="font-medium">{label}</span>}
               </button>
             ))}
           </div>
